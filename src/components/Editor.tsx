@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useEffect, forwardRef, useImperativeHandle } from 'react';
+import React, { useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
 
 interface EditorProps {
   value: string;

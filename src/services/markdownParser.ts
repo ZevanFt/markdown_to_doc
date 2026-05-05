@@ -35,7 +35,7 @@ export function parseMarkdown(markdown: string): string {
   let processed = markdown;
 
   // 提取块级公式 $$...$$
-  processed = processed.replace(BLOCK_MATH_REGEX, (match, tex) => {
+  processed = processed.replace(BLOCK_MATH_REGEX, (_match, tex) => {
     const placeholder = `%%MATH_BLOCK_${mathBlocks.length}%%`;
     mathBlocks.push({
       placeholder,
@@ -45,7 +45,7 @@ export function parseMarkdown(markdown: string): string {
   });
 
   // 提取行内公式 $...$
-  processed = processed.replace(INLINE_MATH_REGEX, (match, tex) => {
+  processed = processed.replace(INLINE_MATH_REGEX, (_match, tex) => {
     const placeholder = `%%MATH_INLINE_${mathBlocks.length}%%`;
     mathBlocks.push({
       placeholder,

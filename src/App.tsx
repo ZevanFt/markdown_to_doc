@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Editor, { type EditorHandle } from './components/Editor';
 import Preview, { type PreviewHandle } from './components/Preview';
 import FileUpload from './components/FileUpload';
@@ -17,8 +17,8 @@ import './preview.css';
 const App: React.FC = () => {
   const { markdown, html, updateMarkdown, clearMarkdown, loadTemplate } = useMarkdown();
   const { showToast, ToastComponent } = useToast();
-  const { theme, toggleTheme, isDark } = useTheme();
-  const { lastSaved, restore, clearSaved } = useAutoSave(markdown);
+  const { toggleTheme, isDark } = useTheme();
+  const { restore, clearSaved } = useAutoSave(markdown);
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
@@ -138,9 +138,6 @@ const App: React.FC = () => {
       const editorScrollTop = previewScrollRatio * (editor.scrollHeight() - editor.clientHeight());
       editor.scrollTo(editorScrollTop);
     };
-
-    const editorEl = document.querySelector('.editor-scroll-listener') as HTMLElement;
-    const previewEl = document.querySelector('.preview-scroll-listener') as HTMLElement;
 
     // 监听 textarea 的 scroll
     const textarea = document.querySelector('textarea');
