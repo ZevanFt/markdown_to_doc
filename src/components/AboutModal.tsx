@@ -90,6 +90,19 @@ const AboutModal: React.FC<AboutModalProps> = ({ visible, onClose }) => {
               技术栈：React + TypeScript + Tailwind CSS + KaTeX
             </p>
           </div>
+
+          {/* 开源许可 */}
+          <div className="pt-2 border-t border-border-light">
+            <p className="text-[12px] font-medium text-text-secondary mb-2">开源许可</p>
+            <div className="space-y-1 text-[11px] text-text-secondary/70">
+              <div className="flex justify-between"><span>React</span><span>MIT</span></div>
+              <div className="flex justify-between"><span>marked</span><span>MIT</span></div>
+              <div className="flex justify-between"><span>KaTeX</span><span>MIT</span></div>
+              <div className="flex justify-between"><span>docx</span><span>MIT</span></div>
+              <div className="flex justify-between"><span>markdown-docx</span><span>MIT</span></div>
+              <div className="flex justify-between"><span>TypeScript</span><span>Apache-2.0</span></div>
+            </div>
+          </div>
         </div>
 
         {/* 底部按钮 */}
