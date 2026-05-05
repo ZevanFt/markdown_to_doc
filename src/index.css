@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+@theme {
+  /* 亮色模式（默认）- Claude 风格配色 */
+  --color-bg: #f5f4ed;
+  --color-surface: #ffffff;
+  --color-paper: #faf9f5;
+  --color-text: #1a1a1a;
+  --color-text-secondary: #6b6b6b;
+  --color-border: #e5e4df;
+  --color-border-light: #edece6;
+  --color-accent: #c96442;
+  --color-accent-hover: #b55a3b;
+  --color-accent-light: #f5ebe6;
+  --color-accent-subtle: #faf6f4;
+  --color-danger: #c45c4a;
+  --color-code-bg: #f0eeea;
+
+  --font-sans: 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+  --font-serif: 'DM Serif Display', 'Georgia', 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, Consolas, monospace;
+}
+
+/* 暗色模式 */
+[data-theme="dark"] {
+  --color-bg: #1a1a1a;
+  --color-surface: #242424;
+  --color-paper: #2a2a2a;
+  --color-text: #f5f5f5;
+  --color-text-secondary: #a0a0a0;
+  --color-border: #3a3a3a;
+  --color-border-light: #333333;
+  --color-accent: #d97a5a;
+  --color-accent-hover: #e08a6a;
+  --color-accent-light: #3a2a24;
+  --color-accent-subtle: #2a1f1a;
+  --color-danger: #d97a6a;
+  --color-code-bg: #2d2d2d;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-light);
+    color: var(--color-accent);
+  }
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-text-secondary);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox 滚动条 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
