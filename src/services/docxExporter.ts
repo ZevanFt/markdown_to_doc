@@ -26,8 +26,15 @@ export async function exportToDocx(markdown: string, filename?: string) {
 
   // 预处理：将 \[...\] 转为 $$...$$，\(...\) 转为 $...$
   // 预处理：将 ==...== 转为 **...**（markdown-docx 不支持高亮标记）
+  // 预处理：在 \[...\] 块内将 === 分数线转换为 \frac{}{} 格式
   const processed = markdown
-    .replace(/\\\[([\s\S]+?)\\\]/g, (_, tex) => `$$${tex}$$`)
+    .replace(/\\\[([\s\S]*?)\\\]/g, (_match, content) => {
+      const fixed = content.replace(
+        /([\s\S]*?)\n\s*={3,}\s*\n([\s\S]*?)$/g,
+        (_: string, num: string, den: string) => `\\frac{${num.trim()}}{${den.trim()}}`
+      );
+      return `$$${fixed}$$`;
+    })
     .replace(/\\\(([\s\S]+?)\\\)/g, (_, tex) => `$${tex}$`)
     .replace(/==([^=]+?)==/g, '**$1**');
 

@@ -42,6 +42,19 @@ export function parseMarkdown(markdown: string): string {
   const mathBlocks: { placeholder: string; html: string }[] = [];
   let processed = markdown;
 
+  // 预处理：在 \[...\] 块内将 === 分数线转换为 \frac{}{} 格式
+  processed = processed.replace(
+    /\\\[([\s\S]*?)\\\]/g,
+    (_match, content: string) => {
+      // 将 "分子 \n ====... \n 分母" 转为 \frac{分子}{分母}
+      const fixed = content.replace(
+        /([\s\S]*?)\n\s*={3,}\s*\n([\s\S]*?)$/g,
+        (_: string, num: string, den: string) => `\\frac{${num.trim()}}{${den.trim()}}`
+      );
+      return `\\[${fixed}\\]`;
+    }
+  );
+
   // 提取块级公式 $$...$$
   processed = processed.replace(BLOCK_MATH_REGEX, (_match, tex) => {
     const placeholder = `%%MATH_BLOCK_${mathBlocks.length}%%`;
