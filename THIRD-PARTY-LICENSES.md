@@ -12,6 +12,8 @@
 | [KaTeX](https://github.com/KaTeX/KaTeX) | ^0.16.45 | MIT | LaTeX 公式渲染 |
 | [docx](https://github.com/dolanmiu/docx) | ^9.6.1 | MIT | Word 文档生成 |
 | [markdown-docx](https://github.com/vace/markdown-docx) | ^1.6.0 | MIT | Markdown 转 DOCX（含 OMML 公式支持） |
+| [Mermaid](https://github.com/mermaid-js/mermaid) | ^11.4.1 | MIT | 流程图渲染 |
+| [highlight.js](https://github.com/highlightjs/highlight.js) | ^11.11.1 | BSD-3-Clause | 代码语法高亮 |
 
 ## 开发依赖
 

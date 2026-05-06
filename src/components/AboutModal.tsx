@@ -100,6 +100,8 @@ const AboutModal: React.FC<AboutModalProps> = ({ visible, onClose }) => {
               <div className="flex justify-between"><span>KaTeX</span><span>MIT</span></div>
               <div className="flex justify-between"><span>docx</span><span>MIT</span></div>
               <div className="flex justify-between"><span>markdown-docx</span><span>MIT</span></div>
+              <div className="flex justify-between"><span>Mermaid</span><span>MIT</span></div>
+              <div className="flex justify-between"><span>highlight.js</span><span>BSD-3</span></div>
               <div className="flex justify-between"><span>TypeScript</span><span>Apache-2.0</span></div>
             </div>
           </div>
