@@ -13,8 +13,13 @@ export async function exportToDocx(markdown: string, filename?: string) {
     filename = `${timestamp}_zevan_md_to_doc.docx`;
   }
 
+  // 预处理：将 \[...\] 转为 $$...$$，\(...\) 转为 $...$（markdown-docx 不识别括号语法）
+  const processed = markdown
+    .replace(/\\\[([\s\S]+?)\\\]/g, (_, tex) => `$$${tex}$$`)
+    .replace(/\\\(([\s\S]+?)\\\)/g, (_, tex) => `$${tex}$`);
+
   // 使用 markdown-docx 转换（内置 KaTeX 公式支持，LaTeX → MathML → Word OMML）
-  const doc = await markdownDocx(markdown, {
+  const doc = await markdownDocx(processed, {
     math: {
       engine: 'katex',
     },

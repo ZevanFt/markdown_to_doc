@@ -10,6 +10,8 @@ marked.setOptions({
 // 行内公式和块级公式的正则
 const BLOCK_MATH_REGEX = /\$\$([\s\S]+?)\$\$/g;
 const INLINE_MATH_REGEX = /\$([^\$\n]+?)\$/g;
+const BLOCK_MATH_BRACKET_REGEX = /\\\[([\s\S]+?)\\\]/g;
+const INLINE_MATH_BRACKET_REGEX = /\\\(([\s\S]+?)\\\)/g;
 
 /**
  * 渲染单个公式为 HTML
@@ -44,8 +46,28 @@ export function parseMarkdown(markdown: string): string {
     return placeholder;
   });
 
+  // 提取块级公式 \[...\]
+  processed = processed.replace(BLOCK_MATH_BRACKET_REGEX, (_match, tex) => {
+    const placeholder = `%%MATH_BLOCK_${mathBlocks.length}%%`;
+    mathBlocks.push({
+      placeholder,
+      html: renderMath(tex, true),
+    });
+    return placeholder;
+  });
+
   // 提取行内公式 $...$
   processed = processed.replace(INLINE_MATH_REGEX, (_match, tex) => {
+    const placeholder = `%%MATH_INLINE_${mathBlocks.length}%%`;
+    mathBlocks.push({
+      placeholder,
+      html: renderMath(tex, false),
+    });
+    return placeholder;
+  });
+
+  // 提取行内公式 \(...\)
+  processed = processed.replace(INLINE_MATH_BRACKET_REGEX, (_match, tex) => {
     const placeholder = `%%MATH_INLINE_${mathBlocks.length}%%`;
     mathBlocks.push({
       placeholder,
