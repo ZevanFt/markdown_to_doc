@@ -1,16 +1,8 @@
-import { forwardRef, useRef, useImperativeHandle, useEffect } from 'react';
-import mermaid from 'mermaid';
-import hljs from 'highlight.js';
-
-// 初始化 Mermaid 配置
-mermaid.initialize({
-  startOnLoad: false,
-  theme: 'default',
-  securityLevel: 'loose',
-});
+import { forwardRef, useRef, useImperativeHandle, useEffect, useState } from 'react';
 
 interface PreviewProps {
   html: string;
+  isDark?: boolean;
 }
 
 export interface PreviewHandle {
@@ -20,9 +12,47 @@ export interface PreviewHandle {
   clientHeight: () => number;
 }
 
-const Preview = forwardRef<PreviewHandle, PreviewProps>(({ html }, ref) => {
+const Preview = forwardRef<PreviewHandle, PreviewProps>(({ html, isDark }, ref) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const [hljsModule, setHljsModule] = useState<any>(null);
+
+  // 按需加载 highlight.js 核心 + 常用语言
+  useEffect(() => {
+    import('highlight.js/lib/core').then(async (hljs: any) => {
+      const languages = [
+        'javascript', 'typescript', 'python', 'java', 'cpp', 'c',
+        'go', 'rust', 'bash', 'shell', 'json', 'xml', 'html',
+        'css', 'sql', 'markdown', 'yaml', 'latex', 'matlab',
+        'r', 'ruby', 'php', 'swift', 'kotlin', 'scala',
+      ];
+      for (const lang of languages) {
+        try {
+          const mod = await import(`highlight.js/lib/languages/${lang}`);
+          hljs.registerLanguage(lang, mod.default);
+        } catch {
+          // 语言模块不存在时跳过
+        }
+      }
+      setHljsModule(hljs);
+    });
+  }, []);
+
+  // 动态加载 highlight.js 主题 CSS
+  useEffect(() => {
+    const loadTheme = () => {
+      // 移除旧主题
+      document.querySelectorAll('link[data-hljs-theme]').forEach((el) => el.remove());
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.setAttribute('data-hljs-theme', 'true');
+      link.href = isDark
+        ? 'https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github-dark.min.css'
+        : 'https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github.min.css';
+      document.head.appendChild(link);
+    };
+    loadTheme();
+  }, [isDark]);
 
   useImperativeHandle(ref, () => ({
     scrollTop: () => scrollRef.current?.scrollTop ?? 0,
@@ -37,43 +67,54 @@ const Preview = forwardRef<PreviewHandle, PreviewProps>(({ html }, ref) => {
   useEffect(() => {
     if (!contentRef.current) return;
 
-    const renderMermaidAndHighlight = async () => {
+    const renderAll = async () => {
       const container = contentRef.current;
       if (!container) return;
 
-      // 渲染所有 Mermaid 代码块
+      // 渲染 Mermaid 代码块（懒加载）
       const mermaidBlocks = container.querySelectorAll<HTMLElement>('pre code.language-mermaid');
-      for (const block of mermaidBlocks) {
+      if (mermaidBlocks.length > 0) {
         try {
-          const id = `mermaid-${Math.random().toString(36).substring(2, 10)}`;
-          const { svg } = await mermaid.render(id, block.textContent || '');
-          const wrapper = document.createElement('div');
-          wrapper.className = 'mermaid-container';
-          wrapper.innerHTML = svg;
-          block.parentElement?.replaceWith(wrapper);
+          const mermaid = (await import('mermaid')).default;
+          mermaid.initialize({
+            startOnLoad: false,
+            theme: isDark ? 'dark' : 'default',
+            securityLevel: 'loose',
+          });
+          for (const block of mermaidBlocks) {
+            try {
+              const id = `mermaid-${Math.random().toString(36).substring(2, 10)}`;
+              const { svg } = await mermaid.render(id, block.textContent || '');
+              const wrapper = document.createElement('div');
+              wrapper.className = 'mermaid-container';
+              wrapper.innerHTML = svg;
+              block.parentElement?.replaceWith(wrapper);
+            } catch {
+              block.parentElement?.classList.add('mermaid-error');
+            }
+          }
         } catch {
-          // Mermaid 渲染失败时保留原始代码
-          block.parentElement?.classList.add('mermaid-error');
+          // mermaid 加载失败时保留原始代码
         }
       }
 
       // 代码块语法高亮
-      const codeBlocks = container.querySelectorAll<HTMLElement>('pre code');
-      for (const block of codeBlocks) {
-        // 跳过已处理的 mermaid 块和已有高亮的块
-        if (block.classList.contains('language-mermaid') || block.classList.contains('hljs')) continue;
-        try {
-          hljs.highlightElement(block);
-        } catch {
-          // 忽略高亮失败
+      if (hljsModule) {
+        const codeBlocks = container.querySelectorAll<HTMLElement>('pre code');
+        for (const block of codeBlocks) {
+          if (block.classList.contains('language-mermaid') || block.classList.contains('hljs')) continue;
+          try {
+            hljsModule.highlightElement(block);
+          } catch {
+            // 忽略高亮失败
+          }
         }
       }
     };
 
-    // 延迟执行以确保 DOM 已更新
-    const timer = setTimeout(renderMermaidAndHighlight, 100);
+    const timer = setTimeout(renderAll, 100);
     return () => clearTimeout(timer);
-  }, [html]);
+  }, [html, hljsModule, isDark]);
 
   return (
     <div className="flex flex-col h-full min-w-0">

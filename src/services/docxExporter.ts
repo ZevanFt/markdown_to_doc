@@ -1,24 +1,22 @@
-import { MarkdownDocx, Packer } from 'markdown-docx';
-import {
-  Document,
-  TableOfContents,
-  PageNumber,
-  AlignmentType,
-  Footer,
-  TextRun,
-  Paragraph,
-  type IStylesOptions,
-} from 'docx';
-
-// 中文字体配置
-const cnBodyFont = { name: 'Times New Roman', eastAsia: '宋体' };
-
 /**
  * 将 Markdown 文本转换为 docx 文档并下载
  * 论文排版：A4 纸张、标准页边距、中文字体、自动目录、页码
+ * 使用动态导入，仅在用户点击导出时加载 docx 库
  */
 export async function exportToDocx(markdown: string, filename?: string) {
-  // 生成默认文件名: YYYYMMDD_HHmmss_zevan_md_to_doc
+  // 动态导入（懒加载，减小首屏 bundle）
+  const { MarkdownDocx, Packer } = await import('markdown-docx');
+  const {
+    Document,
+    TableOfContents,
+    PageNumber,
+    AlignmentType,
+    Footer,
+    TextRun,
+    Paragraph,
+  } = await import('docx');
+
+  // 生成默认文件名
   if (!filename) {
     const now = new Date();
     const pad = (n: number) => String(n).padStart(2, '0');
@@ -27,9 +25,14 @@ export async function exportToDocx(markdown: string, filename?: string) {
   }
 
   // 预处理：将 \[...\] 转为 $$...$$，\(...\) 转为 $...$
+  // 预处理：将 ==...== 转为 **...**（markdown-docx 不支持高亮标记）
   const processed = markdown
     .replace(/\\\[([\s\S]+?)\\\]/g, (_, tex) => `$$${tex}$$`)
-    .replace(/\\\(([\s\S]+?)\\\)/g, (_, tex) => `$${tex}$`);
+    .replace(/\\\(([\s\S]+?)\\\)/g, (_, tex) => `$${tex}$`)
+    .replace(/==([^=]+?)==/g, '**$1**');
+
+  // 中文字体配置
+  const cnBodyFont = { name: 'Times New Roman', eastAsia: '宋体' };
 
   // 使用 MarkdownDocx 类获取 section 内容
   const converter = new MarkdownDocx(processed, {
@@ -47,40 +50,37 @@ export async function exportToDocx(markdown: string, filename?: string) {
   // 获取渲染后的内容块
   const content = await converter.toSection();
 
-  // 文档默认样式：正文宋体 + 1.5 倍行距
-  const docStyles: IStylesOptions = {
-    default: {
-      document: {
-        run: {
-          size: 24, // 12pt
-          font: cnBodyFont,
-        },
-        paragraph: {
-          spacing: { line: 360, lineRule: 'auto' },
+  // 手动组装 Document
+  const doc = new Document({
+    styles: {
+      default: {
+        document: {
+          run: {
+            size: 24, // 12pt
+            font: cnBodyFont,
+          },
+          paragraph: {
+            spacing: { line: 360, lineRule: 'auto' },
+          },
         },
       },
     },
-  };
-
-  // 手动组装 Document
-  const doc = new Document({
-    styles: docStyles,
     features: {
-      updateFields: true, // 打开 Word 时自动更新目录
+      updateFields: true,
     },
     sections: [
       {
         properties: {
           page: {
             size: {
-              width: 11906,  // A4: 210mm
-              height: 16838, // A4: 297mm
+              width: 11906,
+              height: 16838,
               orientation: 'portrait',
             },
             margin: {
-              top: 1440,    // 2.54cm
+              top: 1440,
               bottom: 1440,
-              left: 1800,   // 3.17cm
+              left: 1800,
               right: 1800,
             },
             pageNumbers: { start: 1 },
@@ -95,7 +95,7 @@ export async function exportToDocx(markdown: string, filename?: string) {
                   new TextRun({
                     children: [PageNumber.CURRENT],
                     font: cnBodyFont,
-                    size: 18, // 9pt
+                    size: 18,
                   }),
                 ],
               }),

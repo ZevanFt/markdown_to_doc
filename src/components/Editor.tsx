@@ -1,8 +1,10 @@
 import React, { useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
+import Toolbar from './Toolbar';
 
 interface EditorProps {
   value: string;
   onChange: (value: string) => void;
+  showToolbar?: boolean;
 }
 
 export interface EditorHandle {
@@ -10,9 +12,10 @@ export interface EditorHandle {
   scrollTo: (top: number) => void;
   scrollHeight: () => number;
   clientHeight: () => number;
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
 }
 
-const Editor = forwardRef<EditorHandle, EditorProps>(({ value, onChange }, ref) => {
+const Editor = forwardRef<EditorHandle, EditorProps>(({ value, onChange, showToolbar }, ref) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -23,6 +26,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({ value, onChange }, ref) 
     },
     scrollHeight: () => textareaRef.current?.scrollHeight ?? 0,
     clientHeight: () => textareaRef.current?.clientHeight ?? 0,
+    textareaRef,
   }));
 
   const handleKeyDown = useCallback(
@@ -45,7 +49,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({ value, onChange }, ref) 
     [value, onChange]
   );
 
-  // 图片粘贴处理：将截图转为 base64 的 Markdown 图片语法
+  // 图片粘贴处理
   const handlePaste = useCallback(
     async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
       const items = e.clipboardData?.items;
@@ -69,7 +73,6 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({ value, onChange }, ref) 
             const newValue = value.substring(0, start) + imgMarkdown + value.substring(end);
             onChange(newValue);
 
-            // 将光标移到图片标记之后
             requestAnimationFrame(() => {
               const cursorPos = start + imgMarkdown.length;
               textarea.selectionStart = textarea.selectionEnd = cursorPos;
@@ -131,6 +134,9 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({ value, onChange }, ref) 
           {value.length} 字符
         </span>
       </div>
+      {showToolbar && (
+        <Toolbar textareaRef={textareaRef} value={value} onChange={onChange} />
+      )}
       <textarea
         ref={textareaRef}
         value={value}

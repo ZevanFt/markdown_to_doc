@@ -84,6 +84,9 @@ const App: React.FC = () => {
   }
 
   function handleClear() {
+    if (markdown.trim().length > 0 && !window.confirm('确定要清空所有内容吗？此操作不可撤销。')) {
+      return;
+    }
     clearMarkdown();
     clearSaved();
     showToast('已清空内容');
@@ -429,18 +432,18 @@ const App: React.FC = () => {
       <main className="flex-1 min-h-0 flex overflow-hidden p-3 gap-3">
         {/* 桌面端：左右等宽分栏 */}
         <div className="hidden sm:block flex-1 min-w-0 bg-surface rounded-xl border border-border overflow-hidden shadow-sm">
-          <Editor ref={editorRef} value={markdown} onChange={updateMarkdown} />
+          <Editor ref={editorRef} value={markdown} onChange={updateMarkdown} showToolbar />
         </div>
         <div className="hidden sm:block flex-1 min-w-0 bg-surface rounded-xl border border-border overflow-hidden shadow-sm">
-          <Preview ref={previewRef} html={html} />
+          <Preview ref={previewRef} html={html} isDark={isDark} />
         </div>
 
         {/* 移动端：Tab 切换 */}
         <div className={`sm:hidden flex-1 min-w-0 bg-surface rounded-xl border border-border overflow-hidden shadow-sm ${activeTab === 'edit' ? '' : 'hidden'}`}>
-          <Editor value={markdown} onChange={updateMarkdown} />
+          <Editor value={markdown} onChange={updateMarkdown} showToolbar />
         </div>
         <div className={`sm:hidden flex-1 min-w-0 bg-surface rounded-xl border border-border overflow-hidden shadow-sm ${activeTab === 'preview' ? '' : 'hidden'}`}>
-          <Preview html={html} />
+          <Preview html={html} isDark={isDark} />
         </div>
       </main>
 
