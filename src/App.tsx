@@ -4,6 +4,7 @@ import Editor, { type EditorHandle } from './components/Editor';
 import Preview, { type PreviewHandle } from './components/Preview';
 import FileUpload from './components/FileUpload';
 import TemplatePanel from './components/TemplatePanel';
+import ConfirmModal from './components/ConfirmModal';
 import AboutPage from './pages/AboutPage';
 import { useMarkdown } from './hooks/useMarkdown';
 import { useToast } from './components/Toast';
@@ -23,6 +24,7 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showRestorePrompt, setShowRestorePrompt] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [syncScroll, setSyncScroll] = useState(true);
   const menuRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<EditorHandle>(null);
@@ -84,11 +86,19 @@ const App: React.FC = () => {
   }
 
   function handleClear() {
-    if (markdown.trim().length > 0 && !window.confirm('确定要清空所有内容吗？此操作不可撤销。')) {
+    if (markdown.trim().length > 0) {
+      setShowClearConfirm(true);
       return;
     }
     clearMarkdown();
     clearSaved();
+    showToast('已清空内容');
+  }
+
+  function handleClearConfirm() {
+    clearMarkdown();
+    clearSaved();
+    setShowClearConfirm(false);
     showToast('已清空内容');
   }
 
@@ -163,6 +173,16 @@ const App: React.FC = () => {
       <Route path="/" element={
         <div className="h-[100dvh] flex flex-col bg-bg">
           {ToastComponent}
+      <ConfirmModal
+        visible={showClearConfirm}
+        title="清空内容"
+        message="确定要清空所有内容吗？此操作不可撤销。"
+        confirmText="清空"
+        cancelText="取消"
+        danger
+        onConfirm={handleClearConfirm}
+        onCancel={() => setShowClearConfirm(false)}
+      />
 
       {/* 恢复提示 */}
       {showRestorePrompt && (
