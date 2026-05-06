@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Routes, Route, Link } from 'react-router-dom';
 import Editor, { type EditorHandle } from './components/Editor';
 import Preview, { type PreviewHandle } from './components/Preview';
 import FileUpload from './components/FileUpload';
 import TemplatePanel from './components/TemplatePanel';
-import AboutModal from './components/AboutModal';
+import AboutPage from './pages/AboutPage';
 import { useMarkdown } from './hooks/useMarkdown';
 import { useToast } from './components/Toast';
 import { useTheme } from './hooks/useTheme';
@@ -21,7 +22,6 @@ const App: React.FC = () => {
   const { restore, clearSaved } = useAutoSave(markdown);
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [showAbout, setShowAbout] = useState(false);
   const [showRestorePrompt, setShowRestorePrompt] = useState(false);
   const [syncScroll, setSyncScroll] = useState(true);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -155,9 +155,11 @@ const App: React.FC = () => {
   }, [syncScroll, html]);
 
   return (
-    <div className="h-[100dvh] flex flex-col bg-bg">
-      {ToastComponent}
-      <AboutModal visible={showAbout} onClose={() => setShowAbout(false)} />
+    <Routes>
+      {/* 主编辑器页面 */}
+      <Route path="/" element={
+        <div className="h-[100dvh] flex flex-col bg-bg">
+          {ToastComponent}
 
       {/* 恢复提示 */}
       {showRestorePrompt && (
@@ -281,9 +283,9 @@ const App: React.FC = () => {
                 </svg>
               )}
             </button>
-            <button
-              onClick={() => setShowAbout(true)}
-              className="flex items-center justify-center w-8 h-8 rounded-lg text-text-secondary hover:text-text hover:bg-accent-subtle transition-all duration-200 cursor-pointer"
+            <Link
+              to="/about"
+              className="flex items-center justify-center w-8 h-8 rounded-lg text-text-secondary hover:text-text hover:bg-accent-subtle transition-all duration-200"
               title="关于"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -291,7 +293,7 @@ const App: React.FC = () => {
                 <line x1="12" y1="16" x2="12" y2="12" />
                 <line x1="12" y1="8" x2="12.01" y2="8" />
               </svg>
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -385,9 +387,10 @@ const App: React.FC = () => {
                   清空内容
                 </button>
                 <div className="h-px bg-border-light mx-2 my-1" />
-                <button
-                  onClick={() => { setShowAbout(true); setShowMobileMenu(false); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[13px] font-medium text-text hover:bg-accent-subtle transition-colors cursor-pointer"
+                <Link
+                  to="/about"
+                  onClick={() => setShowMobileMenu(false)}
+                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[13px] font-medium text-text hover:bg-accent-subtle transition-colors no-underline"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="10" />
@@ -395,7 +398,7 @@ const App: React.FC = () => {
                     <line x1="12" y1="8" x2="12.01" y2="8" />
                   </svg>
                   关于
-                </button>
+                </Link>
               </div>
             </div>
           )}
@@ -452,7 +455,12 @@ const App: React.FC = () => {
           to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
-    </div>
+        </div>
+      } />
+
+      {/* 关于页面 */}
+      <Route path="/about" element={<AboutPage />} />
+    </Routes>
   );
 };
 
