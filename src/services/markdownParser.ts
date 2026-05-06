@@ -7,6 +7,9 @@ marked.setOptions({
   breaks: false,
 });
 
+// 启用 GFM 任务列表扩展
+marked.use({ gfm: true });
+
 // 行内公式和块级公式的正则
 const BLOCK_MATH_REGEX = /\$\$([\s\S]+?)\$\$/g;
 const INLINE_MATH_REGEX = /\$([^\$\n]+?)\$/g;
@@ -27,6 +30,9 @@ function renderMath(tex: string, displayMode: boolean): string {
     return `<span class="math-error">${tex}</span>`;
   }
 }
+
+// 高亮标记 ==...==
+const HIGHLIGHT_REGEX = /==([^=]+?)==/g;
 
 /**
  * 将 Markdown 文本解析为 HTML（支持 LaTeX 公式）
@@ -75,6 +81,9 @@ export function parseMarkdown(markdown: string): string {
     });
     return placeholder;
   });
+
+  // 处理高亮标记 ==...== → <mark>...</mark>
+  processed = processed.replace(HIGHLIGHT_REGEX, '<mark>$1</mark>');
 
   // 用 marked 解析 Markdown
   let html = marked.parse(processed) as string;

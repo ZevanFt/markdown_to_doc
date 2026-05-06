@@ -190,3 +190,36 @@
   font-family: monospace;
   font-size: 0.9em;
 }
+
+/* 任务列表 */
+.doc-preview .contains-task-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.doc-preview .task-list-item {
+  list-style: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 4px 0;
+}
+
+.doc-preview .task-list-item input[type="checkbox"] {
+  margin-top: 5px;
+  accent-color: var(--color-accent);
+  pointer-events: none;
+}
+
+.doc-preview .task-list-item input[type="checkbox"]:checked + p {
+  text-decoration: line-through;
+  color: var(--color-text-secondary);
+}
+
+/* 高亮标记 */
+.doc-preview mark {
+  background-color: #fff3b0;
+  color: inherit;
+  padding: 1px 4px;
+  border-radius: 3px;
+}

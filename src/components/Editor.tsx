@@ -45,6 +45,82 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({ value, onChange }, ref) 
     [value, onChange]
   );
 
+  // 图片粘贴处理：将截图转为 base64 的 Markdown 图片语法
+  const handlePaste = useCallback(
+    async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (!file) continue;
+
+          const reader = new FileReader();
+          reader.onload = () => {
+            const base64 = reader.result as string;
+            const imgMarkdown = `\n![${file.name || 'image'}](${base64})\n`;
+            const textarea = textareaRef.current;
+            if (!textarea) return;
+
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const newValue = value.substring(0, start) + imgMarkdown + value.substring(end);
+            onChange(newValue);
+
+            // 将光标移到图片标记之后
+            requestAnimationFrame(() => {
+              const cursorPos = start + imgMarkdown.length;
+              textarea.selectionStart = textarea.selectionEnd = cursorPos;
+              textarea.focus();
+            });
+          };
+          reader.readAsDataURL(file);
+          return;
+        }
+      }
+    },
+    [value, onChange]
+  );
+
+  // 拖拽图片处理
+  const handleDrop = useCallback(
+    (e: React.DragEvent<HTMLTextAreaElement>) => {
+      const files = e.dataTransfer?.files;
+      if (!files || files.length === 0) return;
+
+      const imageFile = Array.from(files).find((f) => f.type.startsWith('image/'));
+      if (!imageFile) return;
+
+      e.preventDefault();
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result as string;
+        const imgMarkdown = `\n![${imageFile.name || 'image'}](${base64})\n`;
+        const textarea = textareaRef.current;
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const newValue = value.substring(0, start) + imgMarkdown + value.substring(end);
+        onChange(newValue);
+
+        requestAnimationFrame(() => {
+          const cursorPos = start + imgMarkdown.length;
+          textarea.selectionStart = textarea.selectionEnd = cursorPos;
+          textarea.focus();
+        });
+      };
+      reader.readAsDataURL(imageFile);
+    },
+    [value, onChange]
+  );
+
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+  }, []);
+
   return (
     <div ref={containerRef} className="flex flex-col h-full min-w-0">
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-border-light bg-accent-subtle shrink-0">
@@ -60,8 +136,11 @@ const Editor = forwardRef<EditorHandle, EditorProps>(({ value, onChange }, ref) 
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
+        onPaste={handlePaste}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
         className="flex-1 min-w-0 w-full p-4 bg-transparent resize-none outline-none text-[14px] leading-relaxed font-mono text-text placeholder:text-text-secondary/40"
-        placeholder="在此输入 Markdown 内容..."
+        placeholder="在此输入 Markdown 内容...（支持粘贴截图和拖拽图片）"
         spellCheck={false}
       />
     </div>
