@@ -223,3 +223,36 @@
   padding: 1px 4px;
   border-radius: 3px;
 }
+
+/* Mermaid 流程图 */
+.doc-preview .mermaid-container {
+  margin: 14px 0;
+  text-align: center;
+  overflow-x: auto;
+}
+
+.doc-preview .mermaid-container svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.doc-preview .mermaid-error {
+  border-color: var(--color-danger) !important;
+}
+
+/* 代码块语法高亮 - highlight.js 主题 */
+.doc-preview pre code.hljs {
+  background: none;
+  padding: 0;
+}
+
+/* 代码块语言标签 */
+.doc-preview pre {
+  position: relative;
+}
+
+.doc-preview pre code {
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.65;
+}
